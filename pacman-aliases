@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 LANG=$(echo "$LANG" | cut -d'.' -f1)
 command_exists() {
@@ -6,40 +6,37 @@ command_exists() {
 }
 if [ "$1" = "install" ] || [ "$1" = "i" ] || [ "$1" = "add" ]; then
     shift
-    /usr/bin/pacman -S "$@"
-elif [ "$1" = "update" ]; then
+    pacman -S "$@"
+elif [ "$1" = "update" ] || [ "$1" = "upgrade" ]; then
     shift
-    /usr/bin/pacman -Sy "$@"
-elif [ "$1" = "upgrade" ]; then
-    shift
-    /usr/bin/pacman -Syu "$@"
+    pacman -Sy "$@"
 elif [ "$1" = "search" ]; then
     shift
-    /usr/bin/pacman -Ss "$@"
+    pacman -Ss "$@"
 elif [ "$1" = "info" ]; then
     shift
-    /usr/bin/pacman -Qii "$@"
+    pacman -Qii "$@"
 elif [ "$1" = "autoremove" ]; then
     shift
-    /usr/bin/pacman -Rs $(pacman -Qdtq)
+    pacman -Rns $(pacman -Qdtq)
 elif [ "$1" = "remove" ] || [ "$1" = "uninstall" ] || [ "$1" = "delete" ]; then
     shift
-    /usr/bin/pacman -R "$@"
+    pacman -R "$@"
 elif [ "$1" = "purge" ] || [ "$1" = "fullremove" ] || [ "$1" = "fulluninstall" ]; then
     shift
-    /usr/bin/pacman -Rsnc "$@"
+    pacman -Rsnc "$@"
 elif [ "$1" = "clean" ] || [ "$1" = "autoclean" ]; then
     shift
-    /usr/bin/pacman -Sc "$@"
+    pacman -Sc "$@"
 elif [ "$1" = "mirrors" ] || [ "$1" = "mirrorlist" ]; then
     shift
     cat /etc/pacman.d/mirrorlist
 elif [ "$1" = "listpackages" ] || [ "$1" = "lsp" ]; then
     shift
-    /usr/bin/pacman -Q "$@"
+    pacman -Q "$@"
 elif [ "$1" = "list" ] || [ "$1" = "ls" ]  || [ "$1" = "listrepos" ]  || [ "$1" = "lsr" ]; then
     shift
-    /usr/bin/pacman -Sl "$@"
+    pacman -Sl "$@"
 elif [ "$1" = "allrepos" ] || [ "$1" = "repos" ] || [ "$1" = "editrepos" ] || [ "$1" = "config" ]; then
     shift
     nano /etc/pacman.conf
@@ -59,15 +56,12 @@ elif [ "$1" = "addmirror" ]; then
     else
         echo -e "\e[0;32m[Pacman Aliases] \e[0mMirror '$mirror_name' added successfully."
     fi
-elif [ "$1" = "reinstall" ]; then
-    shift
-    sudo /usr/bin/pacman -S --overwrite '*' "$@"
 elif [ "$1" = "version" ] || [ "$1" = "v" ]; then
     shift
-    sudo /usr/bin/pacman --version "$@"
+    pacman --version "$@"
 elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "h" ]; then
     shift
-    sudo /usr/bin/pacman -h "$@"
+    pacman -h "$@"
     if [ "$LANG" = "tr_TR" ]; then
         echo -e "\e[0;32m[Pacman Aliases] \e[0mPacman Aliases yardım sayfasına erişmek için 'pacman aliases' yazın."
     else
@@ -78,8 +72,7 @@ elif [ "$1" = "aliases" ] || [ "$1" = "alias" ] || [ "$1" = "aliaseshelp" ]; the
     if [ "$LANG" = "tr_TR" ]; then
                 echo -e "\e[0;34mKullanım: \e[1;34mpacman <komut>\e[0m"
                 echo -e "    \e[1;34minstall: \e[1;37mBir paketi sisteminize kurar. (-S)"
-                echo -e "    \e[1;34mupdate: \e[1;37mPaket veritabanını günceller. (-Sy)"
-                echo -e "    \e[1;34mupgrade: \e[1;37mSistemdeki tüm paketleri günceller. (-Syu)"
+                echo -e "    \e[1;34mupdate: \e[1;3mSistemdeki paketleri günceller (-Syu)"
                 echo -e "    \e[1;34msearch: \e[1;37mPaket veritabanında arama yapar. (-Ss)"
                 echo -e "    \e[1;34minfo: \e[1;37mKurulu paketler hakkında ayrıntılı bilgi gösterir. (-Qii)"
                 echo -e "    \e[1;34mautoremove: \e[1;37mBağımlılıkları olmayan eski paketleri kaldırır. (-Qdtq)"
@@ -89,7 +82,6 @@ elif [ "$1" = "aliases" ] || [ "$1" = "alias" ] || [ "$1" = "aliaseshelp" ]; the
                 echo -e "    \e[1;34mlistrepos: \e[1;37mKurulu paketler ile bulundukları depoları gösterir. (-Sl)"
                 echo -e "    \e[1;34mconfig: \e[1;37mPacman yapılandırma dosyasını gösterir/düzenler."
                 echo -e "    \e[1;34maddmirror: \e[1;37mBelirtilen bir ayna adresini mirrorlist dosyasına ekler."
-                echo -e "    \e[1;34mreinstall: \e[1;37mPaketi kurarken üstüne yazar. (-S --overwrite)"
                 echo ""
                 echo -e "    \e[1;34mhelp: \e[1;37mPacman yardım sayfasını gösterir. (-h)"
                 echo -e "    \e[1;34mversion: \e[1;37mPacman sürüm bilgilerini gösterir. (--version)"
@@ -99,8 +91,7 @@ elif [ "$1" = "aliases" ] || [ "$1" = "alias" ] || [ "$1" = "aliaseshelp" ]; the
             else
                 echo -e "\e[0;34mUsage: \e[1;34mpacman <command>\e[0m"
                 echo -e "    \e[1;34minstall: \e[1;37mInstalls a package. (-S)"
-                echo -e "    \e[1;34mupdate: \e[1;37mUpdates package database. (-Sy)"
-                echo -e "    \e[1;34mupgrade: \e[1;37mUpgrades all packages on the system. (-Syu)"
+                echo -e "    \e[1;34mupdate: \e[1;37mUpgrades all packages. (-Syu)"
                 echo -e "    \e[1;34msearch: \e[1;37mSearches package database. (-Ss)"
                 echo -e "    \e[1;34minfo: \e[1;37mDisplays detailed information about installed packages. (-Qii)"
                 echo -e "    \e[1;34mautoremove: \e[1;37mRemoves old packages that are not required as dependencies. (-Qdtq)"
@@ -110,7 +101,6 @@ elif [ "$1" = "aliases" ] || [ "$1" = "alias" ] || [ "$1" = "aliaseshelp" ]; the
                 echo -e "    \e[1;34mlistrepos: \e[1;37mLists packages along with their repositories. (-Sl)"
                 echo -e "    \e[1;34mconfig: \e[1;37mDisplays or edits Pacman configuration file."
                 echo -e "    \e[1;34maddmirror: \e[1;37mAdds a specified mirror to the mirrorlist file."
-                echo -e "    \e[1;34mreinstall: \e[1;37mReinstalls a package, overwriting existing files. (-S --overwrite)"
                 echo ""
                 echo -e "    \e[1;34mhelp: \e[1;37mDisplays Pacman help page. (-h)"
                 echo -e "    \e[1;34mversion: \e[1;37mDisplays Pacman version information. (--version)"
@@ -180,9 +170,9 @@ elif [ "$1" = "autoinstall" ]; then
                     echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib repository is already enabled."
                 fi
             fi
-            sudo pacman -Sy
+            sudo pacman -Syu
             sudo pacman -S flatpak packagekit-qt5 packagekit-qt6
-            sudo pacman -Sy
+            
             if [ "$LANG" = "tr_TR" ]; then
                 echo -e "\e[0;32m[Pacman Aliases] \e[0m'kdediscover' kurulum betiği tamamlandı."
             else
@@ -219,7 +209,7 @@ elif [ "$1" = "autoinstall" ]; then
                     echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib repository is already enabled."
                 fi
             fi
-            sudo pacman -Sy
+            sudo pacman -Syu
             sudo pacman -S wine winetricks --noconfirm
             sudo winetricks --self-update
             winetricks dxvk
@@ -306,7 +296,7 @@ elif [ "$1" = "autoinstall" ]; then
                     echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib repository is already enabled."
                 fi
             fi
-            pacman -Sy
+           
             if [ "$LANG" = "tr_TR" ]; then
                 read -p "[Pacman Aliases] Kurulumdan önce tüm paketleri güncellemek istiyor musunuz? [y/n]: " upgrade_choice
             else
@@ -322,7 +312,7 @@ elif [ "$1" = "autoinstall" ]; then
             else
                 echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling open source drivers..."
             fi
-            sudo /usr/bin/pacman -S --noconfirm xf86-video-amdgpu xf86-video-intel
+            sudo pacman -S --noconfirm xf86-video-amdgpu xf86-video-intel
 
             
             if [ "$LANG" = "tr_TR" ]; then
@@ -330,7 +320,7 @@ elif [ "$1" = "autoinstall" ]; then
             else
                 echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling Nvidia drivers 'nvidia' and 'nvidia-utils'..."
             fi
-            sudo /usr/bin/pacman -S --noconfirm nvidia nvidia-utils lib32-nvidia-utils libglvnd lib32-libglvnd lib32-vulkan-icd-loader vulkan-icd-loader xorg-server-devel nvidia-settings opencl-nvidia
+            sudo pacman -S --noconfirm nvidia nvidia-utils lib32-nvidia-utils libglvnd lib32-libglvnd lib32-vulkan-icd-loader vulkan-icd-loader xorg-server-devel nvidia-settings opencl-nvidia
 
             
             if [ -f "/proc/acpi/bbswitch" ]; then
@@ -350,7 +340,7 @@ elif [ "$1" = "autoinstall" ]; then
                 else
                     echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling 'nvidia-prime' package for Nvidia Optimus support..."
                 fi
-                sudo /usr/bin/pacman -S --noconfirm nvidia-prime
+                sudo pacman -S --noconfirm nvidia-prime
             fi
 
             
@@ -393,5 +383,5 @@ elif [ "$1" = "autoinstall" ]; then
 
     esac
 else
-    /usr/bin/pacman "$@"
+    pacman "$@"
 fi
