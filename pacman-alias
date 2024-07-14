@@ -1,0 +1,397 @@
+#!/bin/bash
+
+LANG=$(echo "$LANG" | cut -d'.' -f1)
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+if [ "$1" = "install" ] || [ "$1" = "i" ] || [ "$1" = "add" ]; then
+    shift
+    /usr/bin/pacman -S "$@"
+elif [ "$1" = "update" ]; then
+    shift
+    /usr/bin/pacman -Sy "$@"
+elif [ "$1" = "upgrade" ]; then
+    shift
+    /usr/bin/pacman -Syu "$@"
+elif [ "$1" = "search" ]; then
+    shift
+    /usr/bin/pacman -Ss "$@"
+elif [ "$1" = "info" ]; then
+    shift
+    /usr/bin/pacman -Qii "$@"
+elif [ "$1" = "autoremove" ]; then
+    shift
+    /usr/bin/pacman -Rs $(pacman -Qdtq)
+elif [ "$1" = "remove" ] || [ "$1" = "uninstall" ] || [ "$1" = "delete" ]; then
+    shift
+    /usr/bin/pacman -R "$@"
+elif [ "$1" = "purge" ] || [ "$1" = "fullremove" ] || [ "$1" = "fulluninstall" ]; then
+    shift
+    /usr/bin/pacman -Rsnc "$@"
+elif [ "$1" = "clean" ] || [ "$1" = "autoclean" ]; then
+    shift
+    /usr/bin/pacman -Sc "$@"
+elif [ "$1" = "mirrors" ] || [ "$1" = "mirrorlist" ]; then
+    shift
+    cat /etc/pacman.d/mirrorlist
+elif [ "$1" = "listpackages" ] || [ "$1" = "lsp" ]; then
+    shift
+    /usr/bin/pacman -Q "$@"
+elif [ "$1" = "list" ] || [ "$1" = "ls" ]  || [ "$1" = "listrepos" ]  || [ "$1" = "lsr" ]; then
+    shift
+    /usr/bin/pacman -Sl "$@"
+elif [ "$1" = "allrepos" ] || [ "$1" = "repos" ] || [ "$1" = "editrepos" ] || [ "$1" = "config" ]; then
+    shift
+    nano /etc/pacman.conf
+elif [ "$1" = "addmirror" ]; then
+    shift
+    if [ $# -ne 2 ]; then
+        echo "Kullanım: $0 addmirror <ayna_adı> <ayna_url>"
+        exit 1
+    fi
+    mirror_name="$1"
+    mirror_url="$2"
+    escaped_url=$(printf '%s\n' "$mirror_url" | sed -e 's/[\/&]/\\&/g')
+    sudo sed -i "/^Server = $escaped_url/ d" /etc/pacman.d/mirrorlist
+    echo "Server = $mirror_url" | sudo tee -a /etc/pacman.d/mirrorlist
+    if [ "$LANG" = "tr_TR" ]; then
+        echo -e "\e[0;32m[Pacman Aliases] \e[0mAyna '$mirror_name' başarıyla eklendi."
+    else
+        echo -e "\e[0;32m[Pacman Aliases] \e[0mMirror '$mirror_name' added successfully."
+    fi
+elif [ "$1" = "reinstall" ]; then
+    shift
+    sudo /usr/bin/pacman -S --overwrite '*' "$@"
+elif [ "$1" = "version" ] || [ "$1" = "v" ]; then
+    shift
+    sudo /usr/bin/pacman --version "$@"
+elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "h" ]; then
+    shift
+    sudo /usr/bin/pacman -h "$@"
+    if [ "$LANG" = "tr_TR" ]; then
+        echo -e "\e[0;32m[Pacman Aliases] \e[0mPacman Aliases yardım sayfasına erişmek için 'pacman aliases' yazın."
+    else
+        echo -e "\e[0;32m[Pacman Aliases] \e[0mIf you're trying to get Pacman Aliases help page, type 'pacman aliases'."
+    fi
+elif [ "$1" = "aliases" ] || [ "$1" = "alias" ] || [ "$1" = "aliaseshelp" ]; then
+    shift
+    if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;34mKullanım: \e[1;34mpacman <komut>\e[0m"
+                echo -e "    \e[1;34minstall: \e[1;37mBir paketi sisteminize kurar. (-S)"
+                echo -e "    \e[1;34mupdate: \e[1;37mPaket veritabanını günceller. (-Sy)"
+                echo -e "    \e[1;34mupgrade: \e[1;37mSistemdeki tüm paketleri günceller. (-Syu)"
+                echo -e "    \e[1;34msearch: \e[1;37mPaket veritabanında arama yapar. (-Ss)"
+                echo -e "    \e[1;34minfo: \e[1;37mKurulu paketler hakkında ayrıntılı bilgi gösterir. (-Qii)"
+                echo -e "    \e[1;34mautoremove: \e[1;37mBağımlılıkları olmayan eski paketleri kaldırır. (-Qdtq)"
+                echo -e "    \e[1;34mremove: \e[1;37mPaketleri kaldırır. (-R)"
+                echo -e "    \e[1;34mpurge: \e[1;37mPaketleri, yapılandırma dosyalarıyla birlikte kaldırır. (-Rsnc)"
+                echo -e "    \e[1;34mlistpackages: \e[1;37mKurulu paketleri gösterir. (-Q)"
+                echo -e "    \e[1;34mlistrepos: \e[1;37mKurulu paketler ile bulundukları depoları gösterir. (-Sl)"
+                echo -e "    \e[1;34mconfig: \e[1;37mPacman yapılandırma dosyasını gösterir/düzenler."
+                echo -e "    \e[1;34maddmirror: \e[1;37mBelirtilen bir ayna adresini mirrorlist dosyasına ekler."
+                echo -e "    \e[1;34mreinstall: \e[1;37mPaketi kurarken üstüne yazar. (-S --overwrite)"
+                echo ""
+                echo -e "    \e[1;34mhelp: \e[1;37mPacman yardım sayfasını gösterir. (-h)"
+                echo -e "    \e[1;34mversion: \e[1;37mPacman sürüm bilgilerini gösterir. (--version)"
+                echo -e "    \e[1;34maliases: \e[1;37mPacman Aliases yardım sayfasını gösterir."
+                echo ""
+                echo -e "    \e[1;34mautoinstall: \e[1;37mPacman Aliases otomatik kurulum betiklerini gösterir."
+            else
+                echo -e "\e[0;34mUsage: \e[1;34mpacman <command>\e[0m"
+                echo -e "    \e[1;34minstall: \e[1;37mInstalls a package. (-S)"
+                echo -e "    \e[1;34mupdate: \e[1;37mUpdates package database. (-Sy)"
+                echo -e "    \e[1;34mupgrade: \e[1;37mUpgrades all packages on the system. (-Syu)"
+                echo -e "    \e[1;34msearch: \e[1;37mSearches package database. (-Ss)"
+                echo -e "    \e[1;34minfo: \e[1;37mDisplays detailed information about installed packages. (-Qii)"
+                echo -e "    \e[1;34mautoremove: \e[1;37mRemoves old packages that are not required as dependencies. (-Qdtq)"
+                echo -e "    \e[1;34mremove: \e[1;37mRemoves packages. (-R)"
+                echo -e "    \e[1;34mpurge: \e[1;37mRemoves packages along with their configuration files. (-Rsnc)"
+                echo -e "    \e[1;34mlistpackages: \e[1;37mLists installed packages. (-Q)"
+                echo -e "    \e[1;34mlistrepos: \e[1;37mLists packages along with their repositories. (-Sl)"
+                echo -e "    \e[1;34mconfig: \e[1;37mDisplays or edits Pacman configuration file."
+                echo -e "    \e[1;34maddmirror: \e[1;37mAdds a specified mirror to the mirrorlist file."
+                echo -e "    \e[1;34mreinstall: \e[1;37mReinstalls a package, overwriting existing files. (-S --overwrite)"
+                echo ""
+                echo -e "    \e[1;34mhelp: \e[1;37mDisplays Pacman help page. (-h)"
+                echo -e "    \e[1;34mversion: \e[1;37mDisplays Pacman version information. (--version)"
+                echo -e "    \e[1;34maliases: \e[1;37mDisplays Pacman Aliases help page."
+                echo ""
+                echo -e "    \e[1;34mautoinstall: \e[1;37mShows Pacman Aliases automatic installation scripts."
+
+            fi
+elif [ "$1" = "autoinstall" ]; then
+    shift
+    package="$1"
+
+    case "$package" in
+        "yay")
+            if [[ $EUID -eq 0 ]]; then
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mBu komut süper kullanıcı yetkileriyle çalıştırılamaz."
+                else
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mThis command cannot be run with superuser privileges."
+                fi
+                exit 1
+            fi
+
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mAUR paketi 'yay' yükleniyor..."
+            else
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling AUR package 'yay'..."
+            fi
+            git clone https://aur.archlinux.org/yay.git
+            cd yay
+            makepkg -si
+            cd ..
+            rm -rf yay
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;32m[Pacman Aliases] \e[0m'yay' kurulum betiği tamamlandı."
+            else
+                echo -e "\e[0;32m[Pacman Aliases] \e[0m'yay' installation script is done."
+            fi
+            ;;
+        "kdediscover")
+            if [[ $EUID -ne 0 ]]; then
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mBu komut süper kullanıcı yetkileriyle çalıştırılmalıdır."
+                else
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mThis command must be run with superuser privileges."
+                fi
+                exit 1
+            fi
+
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mKDE Keşfet için gerekli paketler yükleniyor..."
+            else
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling packages needed for KDE Discover..."
+            fi
+            if ! grep -q '^\s*\[multilib\]\s*$' /etc/pacman.conf; then
+                echo "[multilib]" | sudo tee -a /etc/pacman.conf
+                echo "Include = /etc/pacman.d/mirrorlist" | sudo tee -a /etc/pacman.conf
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mMultilib deposu aktif edildi."
+                else
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mMultilib repository is enabled."
+                fi
+            else
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib deposu zaten aktif."
+                else
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib repository is already enabled."
+                fi
+            fi
+            sudo pacman -Sy
+            sudo pacman -S flatpak packagekit-qt5 packagekit-qt6
+            sudo pacman -Sy
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;32m[Pacman Aliases] \e[0m'kdediscover' kurulum betiği tamamlandı."
+            else
+                echo -e "\e[0;32m[Pacman Aliases] \e[0m'kdediscover' installation script is done."
+            fi
+            ;;
+        "wine")
+            if [[ $EUID -eq 0 ]]; then
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mBu komut süper kullanıcı yetkileriyle çalıştırılamaz."
+                else
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mThis command cannot be run with superuser privileges."
+                fi
+                exit 1
+            fi
+
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mSisteminizde .exe gibi dosyaların açılabilmesi için gerekli paketler yükleniyor..."
+            else
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mNecessary packages are being installed to open files such as .exe on your system..."
+            fi
+            if ! grep -q '^\s*\[multilib\]\s*$' /etc/pacman.conf; then
+                echo "[multilib]" | sudo tee -a /etc/pacman.conf
+                echo "Include = /etc/pacman.d/mirrorlist" | sudo tee -a /etc/pacman.conf
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mMultilib deposu aktif edildi."
+                else
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mMultilib repository is enabled."
+                fi
+            else
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib deposu zaten aktif."
+                else
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib repository is already enabled."
+                fi
+            fi
+            sudo pacman -Sy
+            sudo pacman -S wine winetricks --noconfirm
+            sudo winetricks --self-update
+            winetricks dxvk
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;32m[Pacman Aliases] \e[0m'wine' kurulum betiği tamamlandı."
+            else
+                echo -e "\e[0;32m[Pacman Aliases] \e[0m'wine' installation script is done."
+            fi
+            exit 1
+            ;;
+        "bluetooth")
+            if [[ $EUID -eq 0 ]]; then
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mBu komut süper kullanıcı yetkileriyle çalıştırılamaz."
+                else
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mThis command cannot be run with superuser privileges."
+                fi
+                exit 1
+            fi
+
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mBluetooth için gerekli paketler yükleniyor..."
+            else
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling packages that necessary for Bluetooth..."
+            fi
+            if command_exists yay; then
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mYay kurulu."
+                else
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mYay is already installed."
+                fi
+            else
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mYay kurulu değil. Kuruluyor..."
+                else
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mYay is not installed. Installing..."
+                fi
+                git clone https://aur.archlinux.org/yay.git
+                cd yay
+                makepkg -si
+                cd ..
+                rm -rf yay
+            fi
+                yay -S bluez bluez-utils
+                sudo systemctl start bluetooth.service
+                sudo systemctl enable bluetooth.services
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0m'bluetooth' kurulum betiği tamamlandı."
+                else
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0m'bluetooth' installation script is done."
+                fi
+            exit 1
+            ;;
+        "nvidia")
+            if [[ $EUID -ne 0 ]]; then
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mBu komut süper kullanıcı yetkileriyle çalıştırılmalıdır."
+                else
+                    echo -e "\e[0;31m[Pacman Aliases] \e[0mThis command must be run with superuser privileges."
+                fi
+                exit 1
+            fi
+            if [ "$LANG" = "tr_TR" ]; then
+                read -p "[Pacman Aliases] Bu betik denenmemiştir ve sürücü kurulumu için otomatik kurulum tavsiye edilmemektedir. Yine de devam etmek ister misiniz? [y/n]: " sure_choice
+            else
+                read -p "[Pacman Aliases] This script is not tested and automatic installation is not recommended for driver installation. Still want to continue? [y/n]: " sure_choice
+            fi
+            sure_choice="${sure_choice,,}"
+            if [ "$sure_choice" != "y" ]; then
+                exit 1
+            fi
+            if ! grep -q '^\s*\[multilib\]\s*$' /etc/pacman.conf; then
+                echo "[multilib]" | sudo tee -a /etc/pacman.conf
+                echo "Include = /etc/pacman.d/mirrorlist" | sudo tee -a /etc/pacman.conf
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mMultilib deposu aktif edildi."
+                else
+                    echo -e "\e[0;32m[Pacman Aliases] \e[0mMultilib repository is enabled."
+                fi
+            else
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib deposu zaten aktif."
+                else
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mMultilib repository is already enabled."
+                fi
+            fi
+            pacman -Sy
+            if [ "$LANG" = "tr_TR" ]; then
+                read -p "[Pacman Aliases] Kurulumdan önce tüm paketleri güncellemek istiyor musunuz? [y/n]: " upgrade_choice
+            else
+                read -p "[Pacman Aliases] Do you want to update all packages before installation? [y/n]: " upgrade_choice
+            fi
+            upgrade_choice="upgrade_choice,,}"
+            if [ "upgrade_choice" = "y" ]; then
+                pacman -Syu
+            fi
+            # Önce açık kaynak sürücüleri kurulumu
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mAçık kaynak sürücüler yükleniyor..."
+            else
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling open source drivers..."
+            fi
+            sudo /usr/bin/pacman -S --noconfirm xf86-video-amdgpu xf86-video-intel
+
+            # Nvidia sürücülerinin yüklenmesi
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mNvidia sürücüsü 'nvidia' ve 'nvidia-utils' paketleri yükleniyor..."
+            else
+                echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling Nvidia drivers 'nvidia' and 'nvidia-utils'..."
+            fi
+            sudo /usr/bin/pacman -S --noconfirm nvidia nvidia-utils lib32-nvidia-utils libglvnd lib32-libglvnd lib32-vulkan-icd-loader vulkan-icd-loader xorg-server-devel nvidia-settings opencl-nvidia
+
+            # Nvidia Optimus kontrolü
+            if [ -f "/proc/acpi/bbswitch" ]; then
+                if grep -q "ON" "/proc/acpi/bbswitch"; then
+                    need_prime=true
+                else
+                    need_prime=false
+                fi
+            else
+                need_prime=false
+            fi
+
+            # Nvidia Optimus kurulumu
+            if $need_prime; then
+                if [ "$LANG" = "tr_TR" ]; then
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mNvidia Optimus desteği için 'nvidia-prime' paketi yükleniyor..."
+                else
+                    echo -e "\e[0;33m[Pacman Aliases] \e[0mInstalling 'nvidia-prime' package for Nvidia Optimus support..."
+                fi
+                sudo /usr/bin/pacman -S --noconfirm nvidia-prime
+            fi
+
+            # Yeniden başlatma kontrolü ve isteği
+            if [ "$LANG" = "tr_TR" ]; then
+                read -p "[Pacman Aliases] Sistem yeniden başlatılsın mı? [y/n]: " restart_choice
+            else
+                read -p "[Pacman Aliases] Do you want to reboot the system? [y/n]: " restart_choice
+            fi
+            restart_choice="${restart_choice,,}"
+            if [ "$restart_choice" = "y" ]; then
+                sudo /sbin/reboot
+            fi
+            exit 1
+            ;;
+        *)
+
+            if [ "$LANG" = "tr_TR" ]; then
+                echo -e "\e[0;31m[Pacman Aliases] \e[0m'$package' isimli bir kurulum betiği bulunmuyor."
+                echo -e "\e[0;34mBu betik hakkında yardım:"
+                echo -e "\e[0;34mKullanım: \e[1;34mpacman autoinstall <betik>\e[0m"
+                echo -e "    \e[1;34myay: \e[1;37mYay AUR yardımcısını sisteminize kurar."
+                echo -e "    \e[1;34mkdediscover: \e[1;37mPacman ve Flatpak paketlerini KDE yazılım yöneticisine ekler."
+                echo -e "    \e[1;34mwine: \e[1;37mWindows uygulamarını sisteminizde çalıştırmanızı sağlar. Oyunlar için DXVK kurulur."
+                echo -e "    \e[1;34mbluetooth: \e[1;37mBluetooth için AUR üzerinden bluez paketlerini kurar."
+                echo -e "    \e[1;34mnvidia: \e[1;37mNVIDIA sürücülerini ve varsa dizüstü bilgisayarınız için optimus sürücülerini kurar."
+                echo -e "\e[1;33mÖNEMLİ UYARI: Bu otomatik kurulum betikleri tamamen test edilememiştir ve aktif olarak geliştirilmemektedir. Burdan otomatik kurmak yerine manuel olarak paketleri kurmanızı tavsiye ediyoruz.\e[0m"
+            else
+                echo -e "\e[0;31m[Pacman Aliases] \e[0m'$package' installation script not found."
+                echo -e "\e[0;34mAbout this script:"
+                echo -e "\e[0;34mUsage: \e[1;34mpacman autoinstall <script>"
+                echo -e "    \e[1;34myay: \e[1;37mInstalls Yay AUR helper on your system."
+                echo -e "    \e[1;34mkdediscover: \e[1;37mAdds Pacman and Flatpak packages to KDE software manager."
+                echo -e "    \e[1;34mwine: \e[1;37mEnables running Windows applications on your system. DXVK is installed for games."
+                echo -e "    \e[1;34mbluetooth: \e[1;37mInstalls bluez packages for Bluetooth via AUR."
+                echo -e "    \e[1;34mnvidia: \e[1;37mInstalls NVIDIA drivers and optimus drivers if available for your laptop."
+                echo -e "\e[1;33mIMPORTANT WARNING: These automatic installation scripts are not thoroughly tested and are not actively maintained. We recommend manual installation of packages instead.\e[0m"
+            fi
+
+            ;;
+
+    esac
+else
+    /usr/bin/pacman "$@"
+fi
