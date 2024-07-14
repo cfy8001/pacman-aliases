@@ -25,6 +25,8 @@ Pacman Aliases is a comprehensive collection of Bash aliases and automatic insta
 - `aliases` (`alias`, `aliaseshelp`): Display Pacman Aliases help page.
 - `autoinstall`: Displays Pacman Aliases automatic installation scripts. (⚠️READ BELOW)
 
+Of course! You can still use pacman commands like `pacman -S`.
+
 **Automatic Installation Scripts**: Includes scripts for installing additional software like:
 - `yay`: Installs Yay AUR helper on your system.
 - `kdediscover`: Adds Pacman and Flatpak packages to KDE software manager. (Enables multilib repository if not enabled.)
