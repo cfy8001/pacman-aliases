@@ -44,7 +44,7 @@ Of course! You can still use pacman commands like `pacman -S`.
 
 1. Clone the repository and compile:
 ```bash
-git clone https://github.com/cfy8001/pacman-aliases.git
+git clone https://github.com/unlbslk/pacman-aliases.git
 cd pacman-aliases
 makepkg -si
 ```
