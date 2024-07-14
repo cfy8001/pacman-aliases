@@ -6,8 +6,7 @@ Pacman Aliases is a comprehensive collection of Bash aliases and automatic insta
 
 **Aliases for Pacman Commands**: Simplified and memorable commands that mirror original `pacman` operations:
 - `install` (`i`, `add`): Install a package (`pacman -S`).
-- `update`: Update package database (`pacman -Sy`).,
-- `upgrade`: Upgrade all packages (`pacman -Syu`).
+- `update` (`upgrade`): Upgrades all packages (`pacman -Syu`).,
 - `search`: Search for a package (`pacman -Ss`).
 - `info`: Display detailed information about a package (`pacman -Si`).
 - `autoremove`: Remove orphaned dependencies (`pacman -Qdtq | pacman -Rs -`).
@@ -19,7 +18,6 @@ Pacman Aliases is a comprehensive collection of Bash aliases and automatic insta
 - `list` (`ls`, `listrepos`, `lsr`): List packages along with their repositories (`pacman -Sl`).
 - `config` (`editrepos`): Display or edit Pacman configuration file (`nano /etc/pacman.conf`).
 - `addmirror`: Add a specified mirror to the mirrorlist file.
-- `reinstall`: Reinstall a package (`pacman -S --overwrite '*'`).
 - `version` (`v`): Display Pacman version information (`pacman --version`).
 - `help` (`-h`, `h`): Display Pacman help page (`pacman --help`).
 - `aliases` (`alias`, `aliaseshelp`): Display Pacman Aliases help page.
