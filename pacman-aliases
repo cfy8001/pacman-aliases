@@ -316,7 +316,7 @@ elif [ "$1" = "autoinstall" ]; then
             if [ "upgrade_choice" = "y" ]; then
                 pacman -Syu
             fi
-            # Önce açık kaynak sürücüleri kurulumu
+            
             if [ "$LANG" = "tr_TR" ]; then
                 echo -e "\e[0;33m[Pacman Aliases] \e[0mAçık kaynak sürücüler yükleniyor..."
             else
@@ -324,7 +324,7 @@ elif [ "$1" = "autoinstall" ]; then
             fi
             sudo /usr/bin/pacman -S --noconfirm xf86-video-amdgpu xf86-video-intel
 
-            # Nvidia sürücülerinin yüklenmesi
+            
             if [ "$LANG" = "tr_TR" ]; then
                 echo -e "\e[0;33m[Pacman Aliases] \e[0mNvidia sürücüsü 'nvidia' ve 'nvidia-utils' paketleri yükleniyor..."
             else
@@ -332,7 +332,7 @@ elif [ "$1" = "autoinstall" ]; then
             fi
             sudo /usr/bin/pacman -S --noconfirm nvidia nvidia-utils lib32-nvidia-utils libglvnd lib32-libglvnd lib32-vulkan-icd-loader vulkan-icd-loader xorg-server-devel nvidia-settings opencl-nvidia
 
-            # Nvidia Optimus kontrolü
+            
             if [ -f "/proc/acpi/bbswitch" ]; then
                 if grep -q "ON" "/proc/acpi/bbswitch"; then
                     need_prime=true
@@ -343,7 +343,7 @@ elif [ "$1" = "autoinstall" ]; then
                 need_prime=false
             fi
 
-            # Nvidia Optimus kurulumu
+            
             if $need_prime; then
                 if [ "$LANG" = "tr_TR" ]; then
                     echo -e "\e[0;33m[Pacman Aliases] \e[0mNvidia Optimus desteği için 'nvidia-prime' paketi yükleniyor..."
@@ -353,7 +353,7 @@ elif [ "$1" = "autoinstall" ]; then
                 sudo /usr/bin/pacman -S --noconfirm nvidia-prime
             fi
 
-            # Yeniden başlatma kontrolü ve isteği
+            
             if [ "$LANG" = "tr_TR" ]; then
                 read -p "[Pacman Aliases] Sistem yeniden başlatılsın mı? [y/n]: " restart_choice
             else
